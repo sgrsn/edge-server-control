@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESP32Servo.h>
 #include "index_html.h"
 
 //const char* ssid = "iPhone2";
@@ -11,8 +12,14 @@ const char *password = "12345678";
 const IPAddress ip(192, 168, 10, 1);
 const IPAddress subnet(255, 255, 255, 0); 
 
-const int led_pin = 14;
+Servo servo1;
+
+const int esc_pin = 21;
+const int led_pin = 22;
 String slider_value = "0";
+// Published values for SG90 servos; adjust if needed
+int minUs = 800;
+int maxUs = 2400;
 
 const int frequency = 5000;
 const int led_channel = 0;
@@ -40,6 +47,8 @@ void setup(){
   ledcSetup(led_channel, frequency, resolution);
   ledcAttachPin(led_pin, led_channel);
   ledcWrite(led_channel, slider_value.toInt());
+  servo1.setPeriodHertz(50);      // Standard 50hz servo
+  servo1.attach(esc_pin, minUs, maxUs);
 
   Serial.println();
   Serial.print("Configuring access point...");
@@ -67,6 +76,7 @@ void setup(){
       message = request->getParam(input_parameter)->value();
       slider_value = message;
       ledcWrite(led_channel, slider_value.toInt());
+      servo1.write(slider_value.toInt());
     }
     else {
       message = "No message sent";
@@ -79,5 +89,4 @@ void setup(){
 }
   
 void loop() {
-  
 }
