@@ -18,10 +18,23 @@ String slider_value = "0";
 int minUs = 800;
 int maxUs = 2400;
 
+unsigned long http_watchdog_time = 0;
+
 const char* input_parameter = "value";
 
 AsyncWebServer server(80);
 const char* index_html = INDEX_HTML; // index_html.hより読み込み
+
+hw_timer_t * timer = NULL;
+void IRAM_ATTR onTimer() {
+  digitalWrite(led_pin, !digitalRead(led_pin));
+  http_watchdog_time++;
+  if (http_watchdog_time > 5)
+  {
+    servo1.writeMicroseconds(minUs);
+    digitalWrite(led_pin, HIGH);
+  }
+}
 
 String processor(const String& var){
   if (var == "SLIDERVALUE"){
@@ -35,6 +48,10 @@ void setup(){
   
   pinMode(led_pin, OUTPUT);
 
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &onTimer, true);
+  timerAlarmWrite(timer, 100000, true);
+
   Serial.println();
   Serial.print("Configuring access point...");
   WiFi.softAP(ssid, password);
@@ -43,16 +60,9 @@ void setup(){
   Serial.print("AP IP address: ");
   Serial.println(myIP);
 
-  //WiFi.begin(ssid, password);
-  /*while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.println("Connecting...");
-  }*/
-
-  //Serial.println(WiFi.localIP());
-
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
+    timerAlarmEnable(timer);
   });
 
   server.on("/slider", HTTP_GET, [] (AsyncWebServerRequest *request) {
@@ -65,6 +75,7 @@ void setup(){
       message = "No message sent";
     }
     request->send(200, "text/plain", "OK");
+    http_watchdog_time = 0;
   });
   
   server.begin();
@@ -73,12 +84,8 @@ void setup(){
   ESP32PWM::allocateTimer(0);
   servo1.setPeriodHertz(50);      // Standard 50hz servo
   servo1.attach(esc_pin, minUs, maxUs);
-  servo1.writeMicroseconds(800);
+  servo1.writeMicroseconds(minUs);
 }
   
 void loop() {
-  digitalWrite(led_pin, HIGH);
-  delay(500);
-  digitalWrite(led_pin, LOW);
-  delay(500);
 }

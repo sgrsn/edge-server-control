@@ -54,17 +54,19 @@ const char INDEX_HTML[] PROGMEM = R"=====(
       <p><span id="textslider_value2" class="slider-val">%SLIDERVALUE%</span></p>
     </div>
   </div>
-
   
 <script>
 function updateSliderPWM(element, elem_id, id_text) {
   document.getElementById(elem_id).value = 0;
   document.getElementById(id_text).innerHTML = 0;
-  var slider_value = document.getElementById(elem_id).value;
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "/slider?value="+slider_value, true);
-  xhr.send();
 }
+
+// 10ms間隔でrequestを送信する関数
+var countup = setInterval(function(){
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/slider?value="+document.getElementById("pwmSlider").value, true);
+  xhr.send();
+} ,10);
 </script>
 
 <br><br>
@@ -77,15 +79,9 @@ const currentValueElem2 = document.getElementById('textslider_value2'); // 埋�
 // inputイベント時に値をセットする関数
 const rangeOnChange = (e) =>{
   currentValueElem.innerText = e.target.value;
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "/slider?value="+e.target.value, true);
-  xhr.send();
 }
 const rangeOnChange2 = (e) =>{
   currentValueElem2.innerText = e.target.value;
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "/slider?value="+e.target.value, true);
-  xhr.send();
 }
 
 
