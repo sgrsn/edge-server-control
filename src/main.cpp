@@ -4,9 +4,6 @@
 #include <ESP32Servo.h>
 #include "index_html.h"
 
-//const char* ssid = "iPhone2";
-//const char* password = "mbedonline";
-
 const char *ssid = "ESP32ap";
 const char *password = "12345678";
 const IPAddress ip(192, 168, 10, 1);
@@ -21,17 +18,9 @@ String slider_value = "0";
 int minUs = 800;
 int maxUs = 2400;
 
-const int frequency = 5000;
-const int led_channel = 0;
-const int resolution = 8;
-
 const char* input_parameter = "value";
 
 AsyncWebServer server(80);
-
-//const char index_html[] PROGMEM = R"rawliteral(
-//const char index_html[]= INDEX_HTML;
-//)rawliteral";
 const char* index_html = INDEX_HTML; // index_html.hより読み込み
 
 String processor(const String& var){
@@ -43,12 +32,8 @@ String processor(const String& var){
 
 void setup(){
   Serial.begin(9600);
-
-  ledcSetup(led_channel, frequency, resolution);
-  ledcAttachPin(led_pin, led_channel);
-  ledcWrite(led_channel, slider_value.toInt());
-  servo1.setPeriodHertz(50);      // Standard 50hz servo
-  servo1.attach(esc_pin, minUs, maxUs);
+  
+  pinMode(led_pin, OUTPUT);
 
   Serial.println();
   Serial.print("Configuring access point...");
@@ -74,19 +59,26 @@ void setup(){
     String message;
     if (request->hasParam(input_parameter)) {
       message = request->getParam(input_parameter)->value();
-      slider_value = message;
-      ledcWrite(led_channel, slider_value.toInt());
-      servo1.write(slider_value.toInt());
+      servo1.writeMicroseconds(map(message.toInt(), 0, 255, minUs, maxUs));
     }
     else {
       message = "No message sent";
     }
-    Serial.println(message);
     request->send(200, "text/plain", "OK");
   });
   
   server.begin();
+
+  // Calibration ESC
+  ESP32PWM::allocateTimer(0);
+  servo1.setPeriodHertz(50);      // Standard 50hz servo
+  servo1.attach(esc_pin, minUs, maxUs);
+  servo1.writeMicroseconds(800);
 }
   
 void loop() {
+  digitalWrite(led_pin, HIGH);
+  delay(500);
+  digitalWrite(led_pin, LOW);
+  delay(500);
 }
