@@ -4,54 +4,63 @@
 #include <ESP32Servo.h>
 #include "index_html.h"
 
+/* WiFi */
 const char *ssid = "ESP32ap";
 const char *password = "12345678";
 const IPAddress ip(192, 168, 10, 1);
 const IPAddress subnet(255, 255, 255, 0); 
 
+/* ESC */
 Servo servo1;
-
 const int esc_pin = 21;
 const int led_pin = 22;
-String slider_value = "0";
-// Published values for SG90 servos; adjust if needed
 int minUs = 800;
 int maxUs = 2400;
 
+/* Watchdogtimer */
 unsigned long http_watchdog_time = 0;
 
-const char* input_parameter = "value";
-
+/* HTTP Server */
 AsyncWebServer server(80);
 const char* index_html = INDEX_HTML; // index_html.hより読み込み
+const char* input_parameter = "value";
 
+/* Timer (watchdogtimer) */
 hw_timer_t * timer = NULL;
 void IRAM_ATTR onTimer() {
-  digitalWrite(led_pin, !digitalRead(led_pin));
   http_watchdog_time++;
   if (http_watchdog_time > 5)
   {
     servo1.writeMicroseconds(minUs);
-    digitalWrite(led_pin, HIGH);
+    digitalWrite(led_pin, !digitalRead(led_pin));
+  }
+  else{
+    digitalWrite(led_pin, LOW);
   }
 }
 
+/* XMLHttpRequest Set initial value of slider */
 String processor(const String& var){
   if (var == "SLIDERVALUE"){
-    return slider_value;
+    return "0";
   }
   return String();
 }
 
 void setup(){
+  /* Serial */
   Serial.begin(9600);
   
   pinMode(led_pin, OUTPUT);
+  digitalWrite(led_pin, LOW);
 
+  /* Timer Setup */
   timer = timerBegin(0, 80, true);
   timerAttachInterrupt(timer, &onTimer, true);
   timerAlarmWrite(timer, 100000, true);
+  timerAlarmEnable(timer);
 
+  /* Wifi access point Setup */
   Serial.println();
   Serial.print("Configuring access point...");
   WiFi.softAP(ssid, password);
@@ -60,9 +69,9 @@ void setup(){
   Serial.print("AP IP address: ");
   Serial.println(myIP);
 
+  /* Server Setup */
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
-    timerAlarmEnable(timer);
   });
 
   server.on("/slider", HTTP_GET, [] (AsyncWebServerRequest *request) {
