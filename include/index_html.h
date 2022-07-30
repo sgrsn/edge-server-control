@@ -33,10 +33,10 @@ const char INDEX_HTML[] PROGMEM = R"=====(
       position: relative;
     }
     .slider-val{
-      background: yellow;
+      background: rgb(255, 50, 81);
       position: absolute;
       top: 0%;
-      left: 0%;
+      left: 50%;
       transform: translateY(0%) translateX(-50%);
     }    
   </style>
@@ -47,11 +47,6 @@ const char INDEX_HTML[] PROGMEM = R"=====(
     <div class="set">
      <p><input type="range" onchange="updateSliderPWM(this, 'pwmSlider', 'textslider_value')" id="pwmSlider" min="0" max="255" value="%SLIDERVALUE%" step="1" class="slider" orient="vertical"</p>
      <p><span id="textslider_value" class="slider-val">%SLIDERVALUE%</span></p>
-    </div>
-    
-    <div class="set">
-      <p><input type="range" onchange="updateSliderPWM(this, 'pwmSlider2', 'textslider_value2')" id="pwmSlider2" min="0" max="255" value="%SLIDERVALUE%" step="1" class="slider" orient="vertical"</p>
-      <p><span id="textslider_value2" class="slider-val">%SLIDERVALUE%</span></p>
     </div>
   </div>
   
@@ -67,29 +62,18 @@ var countup = setInterval(function(){
   xhr.open("GET", "/slider?value="+document.getElementById("pwmSlider").value, true);
   xhr.send();
 } ,10);
-</script>
 
-<br><br>
-<script>
-const inputElem = document.getElementById('pwmSlider'); // input要素
-const inputElem2 = document.getElementById('pwmSlider2'); // input要素
-const currentValueElem = document.getElementById('textslider_value'); // 埋め込む先のspan要素
-const currentValueElem2 = document.getElementById('textslider_value2'); // 埋め込む先のspan要素
+const inputElem = document.getElementById('pwmSlider');
+const currentValueElem = document.getElementById('textslider_value');
 
 // inputイベント時に値をセットする関数
 const rangeOnChange = (e) =>{
   currentValueElem.innerText = e.target.value;
 }
-const rangeOnChange2 = (e) =>{
-  currentValueElem2.innerText = e.target.value;
-}
-
 
 window.onload = () => {
   inputElem.addEventListener('input', rangeOnChange); // スライダー変化時にイベントを発火
-  inputElem2.addEventListener('input', rangeOnChange2); // スライダー変化時にイベントを発火
   currentValueElem.innerText = inputElem.value;
-  currentValueElem2.innerText = inputElem2.value;
 }
 </script>
 
