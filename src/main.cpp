@@ -15,26 +15,47 @@ const IPAddress subnet(255, 255, 255, 0);
 WiFiUDP udp;
 WebServer server(80);
 
-int left_x;
-int left_y;
-int right_x;
-int right_y;
+/* ESC */
+Servo esc;
+const int esc_pin = 2;
+int esc_minUs = 800;
+int esc_maxUs = 2200;
+
+/* Servo */
+Servo servo;
+const int servo_pin = 4;
+int servo_minUs = 1500;
+int servo_maxUs = 1800;
 
 void handleData() {
-  left_x = server.arg("leftX").toInt();
-  left_y = server.arg("leftY").toInt();
-  right_x = server.arg("rightX").toInt();
-  right_y = server.arg("rightY").toInt();
+  const int left_x = server.arg("leftX").toInt();
+  const int left_y = server.arg("leftY").toInt();
+  const int right_x = server.arg("rightX").toInt();
+  const int right_y = server.arg("rightY").toInt();
 
   /* response to client*/
   server.send(200, "text/plain", "");
 
+  /* message */
   Serial.printf("left X: %d left Y: %d right X: %d right Y: %d\n", left_x, left_y, right_x, right_y);
+
+  /* Control esc */
+  esc.writeMicroseconds(map(left_y, -120, 120, esc_minUs, esc_maxUs));
 }
 
 void setup() {
   /* Serial */
   Serial.begin(9600);
+
+  /* Calibration ESC */
+  ESP32PWM::allocateTimer(0);
+  esc.setPeriodHertz(50);      // Standard 50hz servo
+  esc.attach(esc_pin, esc_minUs, esc_maxUs);
+  esc.writeMicroseconds(esc_minUs);
+  servo.setPeriodHertz(50);      // Standard 50hz servo
+  servo.attach(servo_pin, servo_minUs, servo_maxUs);
+  servo.writeMicroseconds(map(0, -120, 120, servo_minUs, servo_maxUs));
+
   /* Wifi access point Setup */
   Serial.println();
   Serial.print("Configuring access point...");
