@@ -28,6 +28,8 @@ void handleData() {
 
   /* response to client*/
   server.send(200, "text/plain", "");
+
+  Serial.printf("left X: %d left Y: %d right X: %d right Y: %d\n", left_x, left_y, right_x, right_y);
 }
 
 void setup() {
@@ -67,6 +69,4 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  Serial.printf("left X: %d left Y: %d right X: %d right Y: %d\n", left_x, left_y, right_x, right_y);
-  delay(10);
 }
