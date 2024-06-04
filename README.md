@@ -17,5 +17,6 @@ ESP32で実行可能なWebサーバー
 cd <workspace>
 git clone git@github.com:sgrsn/edge-server-control.git
 cd edge-server-control
+pio run -t uploadfs
 pio run -t upload
 ```
