@@ -17,13 +17,13 @@ WebServer server(80);
 
 /* ESC */
 Servo esc;
-const int esc_pin = 2;
+const int esc_pin = D0;
 int esc_minUs = 800;
 int esc_maxUs = 2200;
 
 /* Servo */
 Servo servo;
-const int servo_pin = 4;
+const int servo_pin = D2;
 int servo_minUs = 1500;
 int servo_maxUs = 1800;
 
@@ -40,7 +40,14 @@ void handleData() {
   Serial.printf("left X: %d left Y: %d right X: %d right Y: %d\n", left_x, left_y, right_x, right_y);
 
   /* Control esc */
-  esc.writeMicroseconds(map(left_y, -120, 120, esc_minUs, esc_maxUs));
+  int esc_min_duty = map(esc_minUs, 0, 20000, 0, 1023);
+  int esc_max_duty = map(esc_maxUs, 0, 20000, 0, 1023);
+  ledcWrite(1, map(constrain(left_y, 0, 120), 0, 120, esc_min_duty, esc_max_duty));
+
+  /* Control servo */
+  int servo_min_duty = map(servo_minUs, 0, 20000, 0, 1023);
+  int servo_max_duty = map(servo_maxUs, 0, 20000, 0, 1023);
+  ledcWrite(2, map(constrain(right_y, -120, 120), -120, 120, servo_min_duty, servo_max_duty));
 }
 
 void setup() {
@@ -48,13 +55,17 @@ void setup() {
   Serial.begin(9600);
 
   /* Calibration ESC */
-  ESP32PWM::allocateTimer(0);
-  esc.setPeriodHertz(50);      // Standard 50hz servo
-  esc.attach(esc_pin, esc_minUs, esc_maxUs);
-  esc.writeMicroseconds(esc_minUs);
-  servo.setPeriodHertz(50);      // Standard 50hz servo
-  servo.attach(servo_pin, servo_minUs, servo_maxUs);
-  servo.writeMicroseconds(map(0, -120, 120, servo_minUs, servo_maxUs));
+  pinMode(esc_pin, OUTPUT);
+  ledcSetup(1, 50, 10);
+  ledcAttachPin(esc_pin, 1);
+  int min_duty = map(esc_minUs, 0, 20000, 0, 1023);
+  int max_duty = map(esc_maxUs, 0, 20000, 0, 1023);
+  ledcWrite(1, min_duty);
+
+  /* Calibration Servo */
+  pinMode(servo_pin, OUTPUT);
+  ledcSetup(2, 50, 10);
+  ledcAttachPin(servo_pin, 2);
 
   /* Wifi access point Setup */
   Serial.println();
