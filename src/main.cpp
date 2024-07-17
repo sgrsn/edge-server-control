@@ -21,33 +21,48 @@ const int esc_pin = D0;
 int esc_minUs = 800;
 int esc_maxUs = 2200;
 
-/* Servo */
+/* Servo for Horizontal Wing */
 Servo servo;
 const int servo_pin = D2;
-int servo_minUs = 1500;
-int servo_maxUs = 1800;
+int servo_minUs = 1400;
+int servo_maxUs = 2000;
+
+/* Servo for Vertical Wing */
+Servo servo2;
+const int servo2_pin = D1;
+int servo2_minUs = 800;
+int servo2_maxUs = 1600;
+int servo2_neutral = 1200;
 
 void handleData() {
   const int left_x = server.arg("leftX").toInt();
   const int left_y = server.arg("leftY").toInt();
   const int right_x = server.arg("rightX").toInt();
   const int right_y = server.arg("rightY").toInt();
+  const bool leftButton = server.arg("leftButton").toInt();
+  const bool rightButton = server.arg("rightButton").toInt();
 
   /* response to client*/
   server.send(200, "text/plain", "");
 
   /* message */
-  Serial.printf("left X: %d left Y: %d right X: %d right Y: %d\n", left_x, left_y, right_x, right_y);
+  Serial.printf("left X: %d left Y: %d right X: %d right Y: %d L: %d R: %d\n", left_x, left_y, right_x, right_y, leftButton, rightButton);
 
   /* Control esc */
   int esc_min_duty = map(esc_minUs, 0, 20000, 0, 1023);
   int esc_max_duty = map(esc_maxUs, 0, 20000, 0, 1023);
   ledcWrite(1, map(constrain(left_y, 0, 120), 0, 120, esc_min_duty, esc_max_duty));
 
-  /* Control servo */
+  /* Control horizontal servo */
   int servo_min_duty = map(servo_minUs, 0, 20000, 0, 1023);
   int servo_max_duty = map(servo_maxUs, 0, 20000, 0, 1023);
   ledcWrite(2, map(constrain(right_y, -120, 120), -120, 120, servo_min_duty, servo_max_duty));
+
+  /* Control vertical servo */
+  int servo2_min_duty = map(servo2_minUs, 0, 20000, 0, 1023);
+  int servo2_max_duty = map(servo2_maxUs, 0, 20000, 0, 1023);
+  ledcWrite(3, map(constrain(right_x, -120, 120), -120, 120, servo2_min_duty, servo2_max_duty));
+
 }
 
 void setup() {
@@ -58,14 +73,22 @@ void setup() {
   pinMode(esc_pin, OUTPUT);
   ledcSetup(1, 50, 10);
   ledcAttachPin(esc_pin, 1);
-  int min_duty = map(esc_minUs, 0, 20000, 0, 1023);
-  int max_duty = map(esc_maxUs, 0, 20000, 0, 1023);
-  ledcWrite(1, min_duty);
+  int esc_min_duty = map(esc_minUs, 0, 20000, 0, 1023);
+  ledcWrite(1, esc_min_duty);
 
-  /* Calibration Servo */
+  /* Calibration Horizontal Servo */
   pinMode(servo_pin, OUTPUT);
   ledcSetup(2, 50, 10);
   ledcAttachPin(servo_pin, 2);
+  int servo_min_duty = map(servo_minUs, 0, 20000, 0, 1023);
+  ledcWrite(2, servo_min_duty);
+
+  /* Calibration Vertical Servo */
+  pinMode(servo2_pin, OUTPUT);
+  ledcSetup(3, 50, 10);
+  ledcAttachPin(servo2_pin, 3);
+  int servo2_min_duty = map(servo2_neutral, 0, 20000, 0, 1023);
+  ledcWrite(3, servo2_min_duty);
 
   /* Wifi access point Setup */
   Serial.println();
