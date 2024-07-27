@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parameter Adjustment</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .slider-container {
+            margin: 20px 0;
+        }
+        .slider-container label {
+            display: inline-block;
+            width: 150px;
+        }
+        #back-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Parameter Adjustment</h1>
+        <div class="slider-container">
+            <label for="param1">水平尾翼 上限 (下降方向): </label>
+            <input type="range" id="param1" min="800" max="2200" value="2000">
+            <span id="param1-value">2000</span>
+        </div>
+        <div class="slider-container">
+            <label for="param2">水平尾翼 下限 (上昇方向): </label>
+            <input type="range" id="param2" min="800" max="2200" value="800">
+            <span id="param2-value">800</span>
+        </div>
+        <div class="slider-container">
+            <label for="param3">垂直尾翼 上限 (Right): </label>
+            <input type="range" id="param3" min="800" max="2200" value="1800">
+            <span id="param3-value">1800</span>
+        </div>
+        <div class="slider-container">
+            <label for="param4">垂直尾翼 中心: </label>
+            <input type="range" id="param4" min="800" max="2200" value="1500">
+            <span id="param4-value">1500</span>
+        </div>
+        <div class="slider-container">
+            <label for="param5">垂直尾翼 下限 (Left): </label>
+            <input type="range" id="param5" min="800" max="2200" value="1200">
+            <span id="param5-value">1200</span>
+        </div>
+        <div class="slider-container">
+            <label for="param6">ESC上限: </label>
+            <input type="range" id="param6" min="800" max="2200" value="2000">
+            <span id="param6-value">1500</span>
+        </div>
+        
+        <button id="save-button">Save Parameters</button>
+        <button id="back-button" onclick="window.location.href='/'">Back to Main Page</button>
+    </div>
+    <script src="params.js"></script>
+</body>
+</html>
