@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Joystick Interface</title>
+	<style>
+		body {
+			margin: 0;
+			background: linear-gradient(135deg, #ece9e6 0%, #ffffff 100%);
+			font-family: Arial, sans-serif;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			overflow: hidden;
+			flex-direction: column;
+		}
+		#button-area {
+			width: 100%;
+			height: 20%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 0 100px;
+			box-sizing: border-box;
+		}
+		#controls {
+			position: relative;
+			width: 80%;
+			height: 80%;
+			background-color: #f8f8f8;
+			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+		}
+		.info-panel {
+			position: absolute;
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(255, 255, 255, 0.8);
+			padding: 10px 20px;
+			border-radius: 5px;
+			box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+			text-align: center;
+		}
+		.info-panel a {
+			color: #007BFF;
+			text-decoration: none;
+		}
+		.info-panel a:hover {
+			text-decoration: underline;
+		}
+		.touch-button {
+			width: 50px;
+			height: 50px;
+			background-color: rgba(0, 123, 255, 0.8);
+			border-radius: 50%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			color: white;
+			font-size: 24px;
+			cursor: pointer;
+			user-select: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="button-area">
+		<div id="button-left" class="touch-button">L</div>
+		<div id="button-right" class="touch-button">R</div>
+	</div>
+	<div id="controls">
+		<div class="info-panel">
+			Interact with the joysticks
+			<br/>
+			<span id="position1"></span>
+			<br/>
+			<span id="position2"></span>
+		</div>
+	</div>
+	<script src="./virtualjoystick.js"></script>
+	<script>
+		(function() {
+			const container = document.getElementById("controls");
+			const position1 = document.getElementById("position1");
+			const position2 = document.getElementById("position2");
+
+			let leftButtonPressed = 0;
+			let rightButtonPressed = 0;
+
+			const buttonLeft = document.getElementById("button-left");
+			const buttonRight = document.getElementById("button-right");
+
+			buttonLeft.addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				leftButtonPressed = 1;
+				buttonLeft.style.backgroundColor = 'rgba(0, 123, 255, 1)';
+			});
+			buttonLeft.addEventListener('touchend', () => {
+				leftButtonPressed = 0;
+				buttonLeft.style.backgroundColor = 'rgba(0, 123, 255, 0.8)';
+			});
+
+			buttonRight.addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				rightButtonPressed = 1;
+				buttonRight.style.backgroundColor = 'rgba(0, 123, 255, 1)';
+			});
+			buttonRight.addEventListener('touchend', () => {
+				rightButtonPressed = 0;
+				buttonRight.style.backgroundColor = 'rgba(0, 123, 255, 0.8)';
+			});
+
+			document.body.addEventListener('touchstart', function(e) {
+				e.preventDefault();
+			}, { passive: false });
+
+			document.body.addEventListener('touchmove', function(e) {
+				e.preventDefault();
+			}, { passive: false });
+
+			const joystickLeft = new VirtualJoystick({
+				container: container,
+				strokeStyle: 'red',
+				limitStickTravel: true,
+				stickRadius: 120, 
+				stickCenterX: 0,
+				stickCenterY: 0,
+				preventDefault: true
+			});
+
+			joystickLeft.addEventListener('touchStartValidation', function(event){
+				return event.changedTouches[0].pageY > window.innerHeight * 0.2 && event.changedTouches[0].pageX < window.innerWidth / 2;
+			});
+
+			const joystickRight = new VirtualJoystick({
+				container: container,
+				strokeStyle: 'blue',
+				limitStickTravel: true,
+				stickRadius: 120, 
+				stickCenterX: 0,
+				stickCenterY: 0,
+				preventDefault: true
+			});
+
+			joystickRight.addEventListener('touchStartValidation', function(event){
+				return event.changedTouches[0].pageY > window.innerHeight * 0.2 && event.changedTouches[0].pageX >= window.innerWidth / 2;
+			});
+
+			setInterval(function(){
+				const leftX = Math.round(joystickLeft.deltaX());
+				const leftY = Math.round(joystickLeft.deltaY()) * -1;
+				position1.innerHTML = `<b>Left Joystick:</b> X: ${leftX}, Y: ${leftY}`;
+
+				const rightX = Math.round(joystickRight.deltaX());
+				const rightY = Math.round(joystickRight.deltaY()) * -1;
+				position2.innerHTML = `<b>Right Joystick:</b> X: ${rightX}, Y: ${rightY}`;
+
+				const xhr = new XMLHttpRequest();
+				xhr.open('PUT', `./index.html?leftX=${leftX}&leftY=${leftY}&rightX=${rightX}&rightY=${rightY}&leftButton=${leftButtonPressed}&rightButton=${rightButtonPressed}`);
+				xhr.send();
+			}, 200);
+		})();
+	</script>
+</body>
+</html>

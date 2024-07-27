@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joystick Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="button-area">
+        <div id="button-left" class="touch-button">L</div>
+        <div id="button-right" class="touch-button">R</div>
+    </div>
+    <div id="controls">
+        <div class="info-panel">
+            Interact with the joysticks
+            <br/>
+            <span id="position1"></span>
+            <br/>
+            <span id="position2"></span>
+        </div>
+    </div>
+    <button id="params-button" onclick="window.location.href='/params.html'">Adjust Parameters</button>
+    <script src="./virtualjoystick.js"></script>
+    <script src="./joystick.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
